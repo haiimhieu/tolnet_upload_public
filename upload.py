@@ -1,16 +1,9 @@
-# Upload codes for the tolnet archive website
-# As of February 14th, 2023 needed to be on the NASA VPN.
-# Work for python 3+
-
 import requests
 import os,glob
  
 class SessionWithHeaderRedirection(requests.Session):
-    """
-    Session class provided through NASA, this will ensure that your session will stay the same
-    throughout the uploading process. 
-    """
-    AUTH_HOST = 'uat.urs.earthdata.nasa.gov'
+
+    AUTH_HOST = 'urs.earthdata.nasa.gov'
     def __init__(self, username, password):
         super().__init__()
         self.auth = (username, password)
@@ -31,22 +24,24 @@ class SessionWithHeaderRedirection(requests.Session):
                 del headers['Authorization']
         return
  
+all_files = glob.glob(r'C:\Users\kimqu\OneDrive\Desktop\TOLNet-Surface files\TOLNet-SurfaceObs_GSFC_20230814_R0.ict')
+
+print(all_files)
+ 
+# create session with the user credentials that will be used to authenticate access to the data
+ 
+username = "trong_nguyen_gsfc"
+ 
+password= "Tr6218517719!"
 
 
-def upload_file(username, password, file):
-    """
-    Upload file function that is used to upload the file to the website. 
-    Parameters:
-    username = your earthdata username as a string
-    password = your earthdata password as a string
-    file = the path of the file where you want to upload as a string
-    """    
-    
-    session = SessionWithHeaderRedirection(username, password)
+ 
+session = SessionWithHeaderRedirection(username, password)
 
-    t = session.get('https://test-tolnet.nasa.gov/api/auth/login', verify = False)
-    t1 = session.get('https://test-tolnet.nasa.gov/api/auth/ident', verify = False)
+t = session.get('https://tolnet.larc.nasa.gov/api/auth/login')
+t1 = session.get('https://tolnet.larc.nasa.gov/api/auth/ident')
 
+for file in all_files:
     files = {
         'public': (None, 'true'),
         'nearRealTime': (None, 'false'),
@@ -54,12 +49,9 @@ def upload_file(username, password, file):
         'file': open(file, 'rb'),
     }
 
-    response = session.post('https://test-tolnet.nasa.gov/api/data/upload', files=files, verify=False)
+    response = session.post('https://tolnet.larc.nasa.gov/api/data/upload', files=files, verify=False)
 
-    status = response.status_code
-    print(status)
-    # If status code is 200, then file is uploaded successfully
-
-
+    print(response.text)
+    print(response.status_code)
 
  
